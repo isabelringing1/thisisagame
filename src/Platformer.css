@@ -1,0 +1,9 @@
+.platformer-page{
+
+}
+
+.platformer-canvas{
+	display: block;
+	margin: 0 auto;
+	background: transparent;
+}
