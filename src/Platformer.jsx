@@ -1,26 +1,42 @@
 import { useEffect, useRef } from 'react'
-import './Platformer.css'
+import './style/Platformer.css'
 
 const CANVAS_W = 500
-const CANVAS_H = 800
+const CANVAS_H = 600
 const LEVEL_W = 500
 const GRAVITY = 0.5
-const JUMP_FORCE = -10
+const JUMP_FORCE = -11
 const MOVE_SPEED = 4
-const PLAYER_W = 30
-const PLAYER_H = 40
+const PLAYER_W = 20
+const PLAYER_H = 25
 const FLOOR_Y = CANVAS_H - 40
 
+const PLATFORM_COLOR = 'rgb(95, 94, 94)'
+
+
 const BOXES = [
-  { x: CANVAS_W/2 - 40, y: FLOOR_Y - 30, w: 80, h: 30 },
-  { x: CANVAS_W/2 + 90, y: FLOOR_Y - 120, w: 80, h: 20 },
-  { x: CANVAS_W/2 - 100, y: FLOOR_Y - 200, w: 80, h: 20, xVel: 2, distance: 30 },
+  { x: CANVAS_W/2 - 40, y: FLOOR_Y - 20, w: 80, h: 20, radius: 0 },
+  { x: CANVAS_W/2 + 90, y: FLOOR_Y - 110, w: 80, h: 10, radius: 5 },
+  { x: CANVAS_W/2 - 110, y: FLOOR_Y - 200, w: 80, h: 10, xVel: 1, distance: 60, radius: 5 },
+  { x: CANVAS_W/2 + 40, y: FLOOR_Y - 290, w: 80, h: 10, radius: 5 },
+  { x: CANVAS_W/2 - 80, y: FLOOR_Y - 380, w: 50, h: 10, radius: 5 },
+  { x: CANVAS_W/2 + 30, y: FLOOR_Y - 483, w: 30, h: 10, radius: 5, isFinal: true },
 ]
 
-export default function Platformer() {
+// initialize moving-box runtime state
+for (const box of BOXES) {
+  if (box.xVel) {
+    box.originX = box.x
+    box.dir = 1
+  }
+}
+
+export default function Platformer(props) {
+	const { onStageWin, stageState } = props
   const canvasRef = useRef(null)
   const keysRef = useRef({})
   const cameraRef = useRef(0)
+  const wonRef = useRef(false)
   const playerRef = useRef({
     x: 100,
     y: FLOOR_Y - PLAYER_H,
@@ -54,6 +70,28 @@ export default function Platformer() {
     function update() {
       const keys = keysRef.current
       const p = playerRef.current
+
+      // move platforms and carry player
+      for (const box of BOXES) {
+		var onTop = p.y + PLAYER_H >= box.y - 1 && p.y + PLAYER_H <= box.y + 4
+		&& p.x + PLAYER_W > box.x && p.x < box.x + box.w
+		if (onTop && box.isFinal && stageState == "play") {
+			// win the game
+			onStageWin()
+			wonRef.current = true
+		}
+
+        if (!box.xVel) continue
+        const prevX = box.x
+        box.x += box.xVel * box.dir
+        if (box.x >= box.originX + box.distance) { box.x = box.originX + box.distance; box.dir = -1 }
+        if (box.x <= box.originX - box.distance) { box.x = box.originX - box.distance; box.dir = 1 }
+        const platDx = box.x - prevX
+        // carry the player if standing on this box
+        onTop = p.y + PLAYER_H >= box.y - 1 && p.y + PLAYER_H <= box.y + 4
+            && p.x + PLAYER_W > box.x && p.x < box.x + box.w
+        if (onTop) p.x += platDx
+      }
 
       // horizontal movement
       let dx = 0
@@ -130,7 +168,7 @@ export default function Platformer() {
 	  //outline canvas
 	  ctx.strokeStyle = '#000'
 	  ctx.lineWidth = 2
-	  ctx.strokeRect(0, 0, CANVAS_W, CANVAS_H)
+	  //ctx.strokeRect(0, 0, CANVAS_W, CANVAS_H)
 
       // floor
       ctx.beginPath()
@@ -140,24 +178,30 @@ export default function Platformer() {
 
       // boxes
       for (const box of BOXES) {
-		ctx.strokeStyle = '#000'
-		ctx.fillStyle = '#00000080'
-		ctx.strokeRect(box.x, box.y, box.w, box.h)
+		ctx.strokeStyle = PLATFORM_COLOR
+		ctx.fillStyle = PLATFORM_COLOR
+		ctx.beginPath();
+		ctx.roundRect(box.x, box.y, box.w, box.h, box.radius)
+		ctx.stroke();
+		ctx.fill();
+		
       }
 
 	  // finish line text 
 
-	  ctx.font = '30px Monospace'
+	  ctx.font = '20px Monospace'
 	  ctx.fillStyle = '#000'
-	  ctx.fillText('This is a  ame', LEVEL_W / 2 - 120, 70)
+	  //ctx.fillText('This is a  ame', LEVEL_W / 2 - 85, 65)
 
       // player
       const p = playerRef.current
       //ctx.strokeRect(p.x, p.y, PLAYER_W, PLAYER_H)
 
-		ctx.font = '30px Monospace'
+	  if (!wonRef.current) {
+		ctx.font = '20px Monospace'
 		ctx.fillStyle = '#000'
-		ctx.fillText('g', p.x + PLAYER_W / 2 - 10, p.y + PLAYER_H / 2 + 12)
+		ctx.fillText('g', p.x + PLAYER_W / 2 - 6, p.y + PLAYER_H / 2 + 5)
+	}
 
       ctx.restore()
     }
@@ -178,7 +222,7 @@ export default function Platformer() {
   }, [])
 
   return (
-    <div className="platformer-page game-page">
+    <div className="platformer-page">
       <canvas
 	  className="platformer-canvas"
         ref={canvasRef}

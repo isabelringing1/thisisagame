@@ -1,0 +1,18 @@
+.stage-container-platformer{
+	overflow: visible;
+	position: absolute;
+	top: 6dvh;
+	height: auto;
+}
+
+.platformer-page{
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.platformer-canvas{
+	display: block;
+	margin: 0 auto;
+	background: transparent;
+}

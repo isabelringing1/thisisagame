@@ -1,0 +1,64 @@
+.tetris-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: monospace;
+  padding: 20px;
+  min-height: 100vh;
+  color: #ccc;
+  justify-content: center;
+}
+
+.tetris-board {
+  display: grid;
+  gap: 1px;
+  background: #00000021;
+  border: 2px solid #555;
+  padding: 1px;
+}
+
+.tetris-cell {
+  width: 28px;
+  height: 28px;
+  border-radius: 2px;
+}
+
+.tetris-cell--empty {
+  background: #1a1a1a65;
+  border: 1px solid #2a2a2a;
+}
+
+.tetris-cell--filled {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.tetris-cell--ghost {
+  background: transparent;
+  opacity: 0.35;
+}
+
+.tetris-game-over {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.tetris-game-over__title {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.tetris-game-over__button {
+  padding: 8px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #555;
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+}
+
+.tetris-controls {
+  margin-top: 15px;
+  font-size: 12px;
+  color: #666;
+}
